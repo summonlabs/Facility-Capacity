@@ -1,0 +1,26 @@
+@PACKAGE_INIT@
+
+# Facility Capacity - DCCP Tranche 2 (Facility Capacity and Placement).
+#
+# Exported target:
+#   dccp::facility_capacity        C++20 library
+#
+# Example:
+#   find_package(facility_capacity 1.0 REQUIRED)
+#   target_link_libraries(app PRIVATE dccp::facility_capacity)
+
+include(CMakeFindDependencyMacro)
+
+include("${CMAKE_CURRENT_LIST_DIR}/facility_capacityTargets.cmake")
+
+set(FACILITY_CAPACITY_LIBRARIES dccp::facility_capacity)
+set(FACILITY_CAPACITY_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
+
+if(NOT TARGET dccp::facility_capacity)
+  set(facility_capacity_FOUND FALSE)
+  set(facility_capacity_NOT_FOUND_MESSAGE
+      "the facility_capacity export set did not provide dccp::facility_capacity")
+  return()
+endif()
+
+check_required_components(facility_capacity)

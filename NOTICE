@@ -1,0 +1,26 @@
+Facility Capacity
+Copyright 2026 Summon Software Labs.
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Facility Capacity is part of Data Center Control Plane (DCCP), Tranche 2:
+Facility Capacity and Placement. It is repository 9 of the 72-runtime DCCP
+corpus and owns the aggregate, generation-bound facility-capacity model that
+composes space, rack, power, cooling, operational-reserve and facility-service
+evidence into one authoritative answer.
+
+Third-party notices
+-------------------
+
+This product includes no third-party source code and links no third-party
+libraries. It is implemented against the C++20 standard library and the
+operating-system interfaces it needs for durable atomic file replacement,
+file flushing and advisory file locking.
+
+The canonical serialization format, the integrity digest (SHA-256, FIPS 180-4)
+and every identity, generation, epoch and quantity type are implemented in this
+repository.
+
+Facility Capacity does not collect or transmit any telemetry. All state,
+snapshots and evidence are written to local files chosen by the operator and
+never leave the machine running the software.
