@@ -1,13 +1,10 @@
 # Facility Capacity
 
-Facility Capacity is the aggregate, generation-bound facility-capacity model of
-the Data Center Control Plane (DCCP). It composes typed, immutable,
+Facility Capacity is the aggregate, generation-bound facility-capacity model.
+It composes typed, immutable,
 generation-stamped evidence from the space, rack, power, cooling,
 operational-reserve and facility-service dimensions into **one** authoritative
 answer, and it decides when that answer must be rejected as stale or incomplete.
-
-It is repository 9 of the 72-runtime DCCP corpus and the first repository of
-DCCP Tranche 2: Facility Capacity and Placement.
 
 * **Version:** 1.0.0
 * **Language:** portable C++20
