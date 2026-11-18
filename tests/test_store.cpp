@@ -9,14 +9,17 @@
 // disposable tree and nothing survives the case.
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -1364,4 +1367,43 @@ FT_TEST(store_format, generation_header_version_is_checked) {
   if (report.value().findings.empty()) {
     FT_FAIL("an unsupported generation format version must be reported as a finding");
   }
+}
+
+FT_TEST(store, a_commit_waits_for_a_reader_of_the_current_pointer) {
+  fsup::TempDir dir("store-current-reader");
+  ManualClock clock(Tick::from_value(1000));
+  const std::filesystem::path root = dir.store_root();
+  const StoreCreateOptions options = store_options();
+
+  auto created = CapacityStore::create(root, options, clock);
+  FT_REQUIRE_OK(created);
+  CapacityStore store = std::move(created.value());
+  auto created_model = FacilityCapacityModel::create(model_config(options), clock);
+  FT_REQUIRE_OK(created_model);
+  FacilityCapacityModel model = std::move(created_model.value());
+  FT_REQUIRE_OK(commit_generation(store, model, 1, 900));
+
+  bool reader_opened = false;
+  bool committed = false;
+  {
+    // Another tool reading the store (an inspection, a backup, a scan) holds the
+    // CURRENT pointer open while the next commit replaces it, and closes it
+    // shortly after.
+    std::ifstream reader(root / std::string(kCurrentName), std::ios::binary);
+    reader_opened = reader.is_open();
+    std::thread writer([&store, &model, &committed] {
+      committed = commit_generation(store, model, 2, 800).has_value();
+    });
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    reader.close();
+    writer.join();
+  }
+  FT_CHECK(reader_opened);
+  // The replacement waits for the reader instead of failing the commit after
+  // its generation file has been installed.
+  FT_CHECK(committed);
+  FT_CHECK_EQ(store.authority().published_generation.value(), std::uint64_t{2});
+  FT_CHECK_EQ(store.authority().file_name, std::string("gen-2.fcs"));
+  auto recovered = store.recover();
+  FT_REQUIRE_OK(recovered);
 }

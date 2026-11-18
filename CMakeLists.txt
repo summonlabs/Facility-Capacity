@@ -61,8 +61,11 @@ if(MSVC)
   endif()
   set(FCAP_ASAN_AVAILABLE OFF)
   if(FCAP_ENABLE_ASAN)
-    target_compile_options(fcap_warnings INTERFACE /fsanitize=address)
-    target_link_options(fcap_warnings INTERFACE /fsanitize=address)
+    # Debug information is required: without it MSVC warns C5072 for every
+    # source, which FCAP_WARNINGS_AS_ERRORS turns into an error. The linker does
+    # not know /fsanitize=address (LNK4044).
+    target_compile_options(fcap_warnings INTERFACE /fsanitize=address /Zi)
+    target_link_options(fcap_warnings INTERFACE /INCREMENTAL:NO /DEBUG)
     set(FCAP_ASAN_AVAILABLE ON)
   endif()
   target_compile_definitions(fcap_warnings INTERFACE
